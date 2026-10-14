@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Super Creador Digital - 3ro de Primaria</title>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #f0f8ff;
+      --card-bg: #ffffff;
+      --text-main: #2d3748;
+      --green-good: #2ecc71;
+      --green-dark: #27ae60;
+      --red-bad: #e74c3c;
+      --red-dark: #c0392b;
+      --blue-accent: #3498db;
+      --yellow-star: #f1c40f;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Fredoka', cursive, sans-serif;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      background-image: radial-gradient(#cbd5e0 1px, transparent 1px);
+      background-size: 20px 20px;
+      margin: 0;
+      padding: 15px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: var(--text-main);
+    }
+
+    .game-container {
+      background-color: var(--card-bg);
+      width: 100%;
+      max-width: 650px;
+      border-radius: 25px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      border: 4px solid var(--blue-accent);
+      padding: 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    header {
+      margin-bottom: 15px;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      color: var(--blue-accent);
+      margin: 5px 0;
+    }
+
+    .level-badge {
+      display: inline-block;
+      background-color: #ffeaa7;
+      color: #d63031;
+      font-weight: 700;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      background-color: #edf2f7;
+      height: 16px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 2px solid #cbd5e0;
+      margin-bottom: 15px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background-color: var(--blue-accent);
+      transition: width 0.3s ease;
+    }
+
+    .score-board {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: space-around;
+      background-color: #f7fafc;
+      padding: 8px;
+      border-radius: 12px;
+    }
+
+    .question-box {
+      background-color: #f8fafc;
+      border: 3px dashed var(--blue-accent);
+      border-radius: 20px;
+      padding: 20px;
+      font-size: 1.25rem;
+      font-weight: 600;
+      min-height: 110px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      line-height: 1.4;
+    }
+
+    .buttons-container {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-bottom: 15px;
+    }
+
+    .btn-card {
+      flex: 1;
+      padding: 15px 10px;
+      border: none;
+      border-radius: 18px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: white;
+      cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.1s;
+      box-shadow: 0 6px 0 rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .btn-card:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 rgba(0,0,0,0.2);
+    }
+
+    .btn-green {
+      background-color: var(--green-good);
+      border-bottom: 4px solid var(--green-dark);
+    }
+
+    .btn-red {
+      background-color: var(--red-bad);
+      border-bottom: 4px solid var(--red-dark);
+    }
+
+    .btn-icon {
+      font-size: 1.8rem;
+    }
+
+    .feedback-box {
+      min-height: 70px;
+      border-radius: 15px;
+      padding: 10px 15px;
+      font-size: 1rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 15px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .feedback-box.show {
+      opacity: 1;
+    }
+
+    .feedback-good {
+      background-color: #d4edda;
+      color: #155724;
+      border: 2px solid var(--green-good);
+    }
+
+    .feedback-bad {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 2px solid var(--red-bad);
+    }
+
+    .btn-next {
+      background-color: var(--blue-accent);
+      color: white;
+      border: none;
+      padding: 10px 25px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      border-radius: 15px;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #2980b9;
+      display: none;
+      margin: 0 auto;
+    }
+
+    .btn-next:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 #2980b9;
+    }
+
+    /* Screen Final */
+    .final-screen {
+      display: none;
+    }
+
+    .final-title {
+      font-size: 2rem;
+      color: var(--blue-accent);
+    }
+
+    .trophy {
+      font-size: 4rem;
+      margin: 10px 0;
+    }
+
+    .btn-restart {
+      background-color: var(--green-good);
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      border-radius: 15px;
+      cursor: pointer;
+      box-shadow: 0 4px 0 var(--green-dark);
+      margin-top: 15px;
+    }
+
+    @media (max-width: 480px) {
+      .buttons-container {
+        flex-direction: column;
+      }
+      h1 { font-size: 1.5rem; }
+      .question-box { font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="game-container">
+    <!-- Pantalla de Juego -->
+    <div id="game-screen">
+      <header>
+        <h1>🎮 Creador Digital Seguro</h1>
+        <div class="level-badge" id="level-title">Nivel 1: Principante</div>
+      </header>
+
+      <div class="progress-bar-container">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+
+      <div class="score-board">
+        <span>Pregunta: <span id="current-q">1</span>/20</span>
+        <span>Puntos: ⭐ <span id="score">0</span></span>
+      </div>
+
+      <div class="question-box" id="question-text">
+        Cargando regla...
+      </div>
+
+      <div class="buttons-container">
+        <button class="btn-card btn-green" onclick="checkAnswer('VERDE')">
+          <span class="btn-icon">🟩</span>
+          <span>¡BUENA ACCIÓN!</span>
+        </button>
+        <button class="btn-card btn-red" onclick="checkAnswer('ROJO')">
+          <span class="btn-icon">🟥</span>
+          <span>¡MALA ACCIÓN!</span>
+        </button>
+      </div>
+
+      <div class="feedback-box" id="feedback-box"></div>
+
+      <button class="btn-next" id="btn-next" onclick="nextQuestion()">Siguiente ➡️</button>
+    </div>
+
+    <!-- Pantalla Final -->
+    <div id="final-screen" class="final-screen">
+      <h1 class="final-title">🎉 ¡Juego Terminado! 🎉</h1>
+      <div class="trophy" id="final-trophy">🏆</div>
+      <h2 id="final-rank">¡Eres un Súper Creador!</h2>
+      <p id="final-score-text" style="font-size: 1.3rem;">Conseguiste 0 de 20 estrellas ⭐</p>
+      <p id="final-message" style="font-size: 1.1rem; line-height: 1.5; color: #4a5568;"></p>
+      <button class="btn-restart" onclick="restartGame()">🔄 Jugar de nuevo</button>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      // Nivel 1
+      { q: "1. Traer a la escuela tu tarjetón con correo y contraseña para la clase de computación.", correct: "VERDE", exp: "¡Muy bien! Es importante traer tus datos a la escuela para poder trabajar en clase.", level: "Nivel 1: ¡Empieza la Aventura!" },
+      { q: "2. Chatear o hablar con personas extrañas que te escriben por internet.", correct: "ROJO", exp: "¡Peligro! Nunca debes hablar con desconocidos en internet.", level: "Nivel 1: ¡Empieza la Aventura!" },
+      { q: "3. Saludar a tus seguidores con respeto y alegría en tus videos.", correct: "VERDE", exp: "¡Excelente! Ser amable atrae a buenos amigos en internet.", level: "Nivel 1: ¡Empieza la Aventura!" },
+      { q: "4. Darle tu contraseña a tu mejor amigo en el recreo.", correct: "ROJO", exp: "¡Atención! Las contraseñas son secretas y no se comparten con amigos.", level: "Nivel 1: ¡Empieza la Aventura!" },
+      { q: "5. Pedir permiso a tus papás antes de subir cualquier foto o video.", correct: "VERDE", exp: "¡Muy bien! Tus papás siempre deben saber qué compartes en internet.", level: "Nivel 1: ¡Empieza la Aventura!" },
+
+      // Nivel 2
+      { q: "6. Escribir comentarios feos o insultos en las publicaciones de otros.", correct: "ROJO", exp: "¡Eso no se hace! Debemos tratar a todos con respeto.", level: "Nivel 2: Creador Amigable" },
+      { q: "7. Compartir un tutorial divertido enseñando a hacer una manualidad.", correct: "VERDE", exp: "¡Genial! Compartir tus talentos ayuda a otros a aprender.", level: "Nivel 2: Creador Amigable" },
+      { q: "8. Aceptar solicitudes de amistad de desconocidos en juegos en línea.", correct: "ROJO", exp: "¡Peligro! Solo debes agregar a personas que conozcas en la vida real.", level: "Nivel 2: Creador Amigable" },
+      { q: "9. Guardar tu tarjetón con correo y contraseña dentro de tu mochila escolar para no perderlo.", correct: "VERDE", exp: "¡Excelente orden! Así lo tendrás listo para cuando el profesor lo pida.", level: "Nivel 2: Creador Amigable" },
+      { q: "10. Usar la tarjeta de crédito de tus papás sin permiso para comprar robux o gemas.", correct: "ROJO", exp: "¡No lo hagas! Comprar cosas sin permiso de tus papás está muy mal.", level: "Nivel 2: Creador Amigable" },
+
+      // Nivel 3
+      { q: "11. Decir la dirección de tu casa o tu teléfono en un video en vivo.", correct: "ROJO", exp: "¡Muy peligroso! Nunca des datos privados en internet.", level: "Nivel 3: Guardián Digital" },
+      { q: "12. Felicitar a un compañero de clase por el video o dibujo que compartió.", correct: "VERDE", exp: "¡Muy bien! Apoyar a tus compañeros los hace sentir felices.", level: "Nivel 3: Guardián Digital" },
+      { q: "13. Publicar un video diciendo mentiras sobre un compañero de tu escuela.", correct: "ROJO", exp: "¡Mala acción! El acoso en internet daña a las personas.", level: "Nivel 3: Guardián Digital" },
+      { q: "14. Apagar la pantalla o dejar la tablet si ves algo que te asusta o te hace sentir mal.", correct: "VERDE", exp: "¡Correcto! Si ves algo feo, apaga la pantalla y avisa a un adulto.", level: "Nivel 3: Guardián Digital" },
+      { q: "15. Decirle tu contraseña al encargado de un ciber internet que no conoces.", correct: "ROJO", exp: "¡Cuidado! Solo tus papás y maestros de confianza pueden ayudarte con tus datos.", level: "Nivel 3: Guardián Digital" },
+
+      // Nivel 4
+      { q: "16. Hacer videos divertidos bailando o jugando con la ayuda de tu familia.", correct: "VERDE", exp: "¡Súper bien! Trabajar en equipo con tu familia es muy seguro y divertido.", level: "Nivel 4: Leyenda del Internet" },
+      { q: "17. Enviar fotos de la credencial o documentos de tus papás a cambio de regalos virtuales.", correct: "ROJO", exp: "¡Peligro! Es una estafa para robar información de tu familia.", level: "Nivel 4: Leyenda del Internet" },
+      { q: "18. Usar un lenguaje bonito y no decir groserías cuando juegas en línea.", correct: "VERDE", exp: "¡Perfecto! Un verdadero profesional juega con educación.", level: "Nivel 4: Leyenda del Internet" },
+      { q: "19. Pasar más de 8 horas seguidas en la pantalla sin hacer la tarea ni descansar.", correct: "ROJO", exp: "¡Mala acción! Debes hacer tus tareas, jugar al aire libre y descansar los ojos.", level: "Nivel 4: Leyenda del Internet" },
+      { q: "20. Mostrar tu tarjetón de correo y contraseña al maestro de computación cuando te pida iniciar sesión.", correct: "VERDE", exp: "¡Excelente! Tu maestro te ayudará a usar tu cuenta escolar de forma segura.", level: "Nivel 4: Leyenda del Internet" }
+    ];
+
+    let currentIndex = 0;
+    let score = 0;
+    let canAnswer = true;
+
+    function loadQuestion() {
+      canAnswer = true;
+      const q = questions[currentIndex];
+      
+      document.getElementById('level-title').innerText = q.level;
+      document.getElementById('current-q').innerText = currentIndex + 1;
+      document.getElementById('question-text').innerText = q.q;
+      
+      const progressPercent = ((currentIndex) / questions.length) * 100;
+      document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+
+      const feedback = document.getElementById('feedback-box');
+      feedback.className = 'feedback-box';
+      feedback.innerText = '';
+
+      document.getElementById('btn-next').style.display = 'none';
+    }
+
+    function checkAnswer(selectedColor) {
+      if (!canAnswer) return;
+      canAnswer = false;
+
+      const q = questions[currentIndex];
+      const feedback = document.getElementById('feedback-box');
+
+      if (selectedColor === q.correct) {
+        score++;
+        document.getElementById('score').innerText = score;
+        feedback.className = 'feedback-box feedback-good show';
+        feedback.innerText = '¡CORRECTO! 🌟 ' + q.exp;
+        
+        confetti({
+          particleCount: 40,
+          spread: 60,
+          origin: { y: 0.8 }
+        });
+      } else {
+        feedback.className = 'feedback-box feedback-bad show';
+        feedback.innerText = '¡UPS! ❌ ' + q.exp;
+      }
+
+      document.getElementById('btn-next').style.display = 'block';
+    }
+
+    function nextQuestion() {
+      currentIndex++;
+      if (currentIndex < questions.length) {
+        loadQuestion();
+      } else {
+        showFinalScreen();
+      }
+    }
+
+    function showFinalScreen() {
+      document.getElementById('game-screen').style.display = 'none';
+      const finalScreen = document.getElementById('final-screen');
+      finalScreen.style.display = 'block';
+
+      document.getElementById('final-score-text').innerText = `Conseguiste ${score} de 20 estrellas ⭐`;
+
+      const rankTitle = document.getElementById('final-rank');
+      const trophy = document.getElementById('final-trophy');
+      const message = document.getElementById('final-message');
+
+      if (score === 20) {
+        trophy.innerText = '🏆';
+        rankTitle.innerText = '¡SÚPER GUARDIÁN DIGITAL!';
+        message.innerText = '¡Increíble! Te sabes perfectamente todas las reglas de seguridad. Traes tus materiales a la escuela, proteges tus contraseñas y sabes navegar sin peligro.';
+        confetti({ particleCount: 150, spread: 100, origin: { y: 0.5 } });
+      } else if (score >= 15) {
+        trophy.innerText = '🥇';
+        rankTitle.innerText = '¡CREADOR EXPERTO!';
+        message.innerText = '¡Muy bien hecho! Conoces muy bien cómo cuidar tus datos y actuar con respeto en internet.';
+      } else if (score >= 10) {
+        trophy.innerText = '🥈';
+        rankTitle.innerText = '¡APRENDIZ DIGITAL!';
+        message.innerText = '¡Buen esfuerzo! Recuerda repasar las reglas: no hablar con extraños, no compartir contraseñas y traer siempre tu tarjetón de correo a la escuela.';
+      } else {
+        trophy.innerText = '🛡️';
+        rankTitle.innerText = '¡NECESITAS REPASAR!';
+        message.innerText = '¡Sigue practicando! Pídele ayuda a tus papás o a tu maestro para aprender a navegar de forma segura.';
+      }
+    }
+
+    function restartGame() {
+      currentIndex = 0;
+      score = 0;
+      document.getElementById('score').innerText = '0';
+      document.getElementById('final-screen').style.display = 'none';
+      document.getElementById('game-screen').style.display = 'block';
+      loadQuestion();
+    }
+
+    // Iniciar juego
+    loadQuestion();
+  </script>
+</body>
+</html>
