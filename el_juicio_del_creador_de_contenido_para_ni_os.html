@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Ser un Buen Youtuber! - El Juicio del Creador de Contenido</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Canvas Confetti para efectos visuales -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- FontAwesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts estilo infantil/game -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Quicksand:wght@600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        fredoka: ['Fredoka', 'sans-serif'],
+                        sans: ['Quicksand', 'sans-serif'],
+                    },
+                    colors: {
+                        kidsYellow: '#FFDE59',
+                        kidsPink: '#FF66C4',
+                        kidsPurple: '#8C52FF',
+                        kidsRed: '#FF4757',
+                        kidsGreen: '#2ED573',
+                        kidsBlue: '#1E90FF'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(135deg, #1E90FF 0%, #8C52FF 50%, #FF66C4 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+
+        h1, h2, h3, .font-game {
+            font-family: 'Fredoka', cursive;
+        }
+
+        /* Animaciones personalizadas */
+        .bounce-soft {
+            animation: bounceSoft 2s infinite;
+        }
+
+        @keyframes bounceSoft {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .card-pop {
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.8) translateY(20px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* Botones de tarjetas gigantes */
+        .btn-tarjeta-verde {
+            background: linear-gradient(180deg, #2ED573 0%, #10AC84 100%);
+            border-bottom: 8px solid #0652DD;
+            border-bottom-color: #0E8364;
+            box-shadow: 0 10px 20px rgba(46, 213, 115, 0.4);
+        }
+        .btn-tarjeta-verde:active {
+            transform: translateY(4px);
+            border-bottom-width: 4px;
+        }
+
+        .btn-tarjeta-roja {
+            background: linear-gradient(180deg, #FF4757 0%, #FF6B81 100%);
+            border-bottom: 8px solid #A40606;
+            box-shadow: 0 10px 20px rgba(255, 71, 87, 0.4);
+        }
+        .btn-tarjeta-roja:active {
+            transform: translateY(4px);
+            border-bottom-width: 4px;
+        }
+
+        .btn-action {
+            border-bottom: 6px solid rgba(0, 0, 0, 0.25);
+        }
+        .btn-action:active {
+            transform: translateY(3px);
+            border-bottom-width: 3px;
+        }
+
+        .shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-2px, 0, 0); }
+            20%, 80% { transform: translate3d(4px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+            40%, 60% { transform: translate3d(6px, 0, 0); }
+        }
+    </style>
+</head>
+<body class="text-slate-800 p-3 sm:p-6 flex flex-col justify-between select-none">
+
+    <!-- Header / Barra Superior estilo Videojuego -->
+    <header class="max-w-3xl w-full mx-auto bg-white/95 backdrop-blur-md rounded-3xl p-4 shadow-xl border-4 border-white flex justify-between items-center mb-4">
+        <div class="flex items-center space-x-3">
+            <div class="w-12 h-12 bg-kidsYellow rounded-2xl flex items-center justify-center text-3xl shadow-inner border-2 border-amber-300 bounce-soft">
+                🎬
+            </div>
+            <div>
+                <h1 class="text-xl sm:text-2xl font-bold text-purple-700 leading-none">¡Ser un Buen Youtuber!</h1>
+                <p class="text-xs text-slate-500 font-bold hidden sm:block">Elige Tarjeta Verde 🟩 o Tarjeta Roja 🟥</p>
+            </div>
+        </div>
+        
+        <!-- Puntos -->
+        <div class="bg-amber-100 border-2 border-amber-300 px-4 py-2 rounded-2xl flex items-center space-x-2">
+            <span class="text-2xl">⭐</span>
+            <div class="text-right">
+                <span class="text-[10px] text-amber-700 font-bold uppercase block leading-none">Estrellas</span>
+                <span id="score-display" class="text-2xl font-game font-black text-amber-600">0</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Área Principal de Juego -->
+    <main class="max-w-2xl w-full mx-auto flex-grow flex flex-col justify-center items-center my-2">
+        
+        <!-- PANTALLA 1: Inicio -->
+        <div id="start-screen" class="w-full bg-white/95 backdrop-blur-md rounded-3xl p-6 sm:p-10 text-center shadow-2xl border-4 border-white card-pop">
+            
+            <div class="flex justify-center space-x-4 mb-4 text-5xl">
+                <span class="animate-bounce">🟩</span>
+                <span class="animate-bounce delay-100">⭐</span>
+                <span class="animate-bounce delay-200">🟥</span>
+            </div>
+
+            <h2 class="text-3xl sm:text-4xl font-game font-bold text-purple-700 mb-3 leading-tight">
+                ¿Quieres ser un Youtuber Inteligente y Seguro? 🌟
+            </h2>
+            
+            <p class="text-slate-600 font-semibold text-base sm:text-lg mb-6 leading-relaxed">
+                Demuestra lo que sabes sobre internet y redes sociales. Responde si cada situación es una **Buena Acción** o una **Mala Acción**.
+            </p>
+
+            <!-- Explicación de las Tarjetas -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8 text-left">
+                <div class="p-4 rounded-2xl bg-emerald-100 border-2 border-emerald-300 flex items-center space-x-3">
+                    <span class="text-4xl">🟩</span>
+                    <div>
+                        <h3 class="font-bold text-emerald-700 font-game text-lg">Tarjeta Verde</h3>
+                        <p class="text-xs font-semibold text-slate-600">¡BUENA ACCIÓN! Regla segura y correcta.</p>
+                    </div>
+                </div>
+                <div class="p-4 rounded-2xl bg-rose-100 border-2 border-rose-300 flex items-center space-x-3">
+                    <span class="text-4xl">🟥</span>
+                    <div>
+                        <h3 class="font-bold text-rose-700 font-game text-lg">Tarjeta Roja</h3>
+                        <p class="text-xs font-semibold text-slate-600">¡MALA ACCIÓN! Peligro o mala conducta.</p>
+                    </div>
+                </div>
+            </div>
+
+            <button id="start-btn" class="w-full sm:w-auto px-10 py-5 bg-kidsGreen hover:bg-emerald-500 text-white font-game font-bold text-2xl rounded-3xl btn-action shadow-lg transition transform active:scale-95">
+                ¡EMPEZAR A JUGAR! 🚀
+            </button>
+        </div>
+
+        <!-- PANTALLA 2: Juego / Preguntas -->
+        <div id="quiz-screen" class="w-full hidden flex-col space-y-4">
+            
+            <!-- Barra de Nivel y Progreso -->
+            <div class="bg-white/90 backdrop-blur-md p-4 rounded-2xl border-4 border-white shadow-md flex flex-col space-y-2">
+                <div class="flex justify-between items-center text-xs sm:text-sm font-bold">
+                    <span id="level-badge" class="px-4 py-1.5 rounded-full bg-purple-500 text-white font-game">
+                        🌱 Nivel 1: Primeros Pasos
+                    </span>
+                    <span id="progress-text" class="text-slate-500 font-bold">Pregunta 1 de 20</span>
+                </div>
+                <!-- Barra de Progreso -->
+                <div class="w-full bg-slate-200 rounded-full h-4 overflow-hidden p-1 border border-slate-300">
+                    <div id="progress-bar" class="bg-gradient-to-r from-kidsYellow via-kidsPink to-kidsPurple h-full rounded-full transition-all duration-300 w-1/20"></div>
+                </div>
+            </div>
+
+            <!-- Tarjeta de Pregunta -->
+            <div id="card-container" class="bg-white/95 backdrop-blur-md rounded-3xl p-6 sm:p-8 text-center shadow-2xl border-4 border-white relative card-pop">
+                
+                <span class="inline-block px-3 py-1 rounded-full bg-amber-100 text-amber-700 font-bold text-xs mb-3">
+                    ¿Qué tarjeta eliges? 🤔
+                </span>
+                
+                <h3 id="question-text" class="text-xl sm:text-2xl font-bold text-slate-800 mb-6 leading-snug min-h-[4rem] flex items-center justify-center">
+                    Cargando la situación...
+                </h3>
+
+                <!-- Botones Gigantes de Respuesta -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                    <button id="btn-green" class="btn-tarjeta-verde p-5 rounded-3xl font-game font-bold text-white text-xl flex items-center justify-center space-x-3 transition transform active:scale-95 hover:brightness-105">
+                        <span class="text-4xl">🟩</span>
+                        <div class="text-left">
+                            <div class="text-xs uppercase opacity-90 font-sans">Elegir</div>
+                            <div>TARJETA VERDE<br><span class="text-xs font-sans font-normal">(¡Buena Acción!)</span></div>
+                        </div>
+                    </button>
+
+                    <button id="btn-red" class="btn-tarjeta-roja p-5 rounded-3xl font-game font-bold text-white text-xl flex items-center justify-center space-x-3 transition transform active:scale-95 hover:brightness-105">
+                        <span class="text-4xl">🟥</span>
+                        <div class="text-left">
+                            <div class="text-xs uppercase opacity-90 font-sans">Elegir</div>
+                            <div>TARJETA ROJA<br><span class="text-xs font-sans font-normal">(¡Mala Acción!)</span></div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Panel de Explicación / Retroalimentación -->
+            <div id="feedback-panel" class="hidden bg-white/95 backdrop-blur-md rounded-3xl p-6 sm:p-8 text-center border-4 border-white shadow-2xl card-pop">
+                <div id="feedback-icon" class="text-6xl mb-2 bounce-soft"></div>
+                <h4 id="feedback-title" class="text-2xl sm:text-3xl font-game font-bold mb-3"></h4>
+                <div id="feedback-desc" class="text-slate-700 text-base sm:text-lg font-medium mb-6 bg-slate-100 p-4 rounded-2xl border-2 border-slate-200 leading-relaxed"></div>
+                
+                <button id="next-btn" class="px-8 py-4 bg-kidsPurple hover:bg-purple-700 text-white font-game font-bold text-xl rounded-2xl btn-action shadow-lg transition transform active:scale-95 inline-flex items-center">
+                    Siguiente Pregunta <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+
+        </div>
+
+        <!-- PANTALLA 3: Final / Diploma -->
+        <div id="end-screen" class="w-full hidden bg-white/95 backdrop-blur-md rounded-3xl p-6 sm:p-10 text-center shadow-2xl border-4 border-white card-pop">
+            
+            <div id="end-icon" class="w-24 h-24 mx-auto mb-4 bg-amber-100 border-4 border-amber-300 rounded-full flex items-center justify-center text-6xl shadow-inner bounce-soft">
+                🏆
+            </div>
+            
+            <h2 class="text-3xl sm:text-4xl font-game font-bold text-purple-700 mb-2">¡Felicitaciones! 🎉</h2>
+            <p class="text-slate-500 font-bold text-sm mb-6">Completaste el Desafío de Seguridad Digital y Creador de Contenido</p>
+
+            <div class="bg-amber-50 rounded-3xl p-6 max-w-md mx-auto mb-6 border-4 border-amber-200 shadow-inner">
+                <div class="text-amber-800 text-xs font-extrabold uppercase tracking-widest mb-1">Tu Puntaje Final</div>
+                <div id="final-score" class="text-5xl font-game font-black text-amber-500 mb-3">0 / 20</div>
+                <div id="rank-badge" class="inline-block px-6 py-2 rounded-full font-game font-bold text-lg bg-kidsYellow text-slate-800 shadow-md">
+                    Calculando Medalla...
+                </div>
+            </div>
+
+            <p id="rank-description" class="text-slate-700 font-semibold text-base sm:text-lg max-w-md mx-auto mb-8 leading-relaxed">
+                ...
+            </p>
+
+            <button id="restart-btn" class="px-10 py-5 bg-kidsGreen hover:bg-emerald-500 text-white font-game font-bold text-2xl rounded-3xl btn-action shadow-lg transition transform active:scale-95 inline-flex items-center">
+                <i class="fa-solid fa-rotate-right mr-3"></i> ¡Jugar Otra Vez!
+            </button>
+        </div>
+
+    </main>
+
+    <!-- Pie de página -->
+    <footer class="max-w-2xl w-full mx-auto text-center py-2 text-xs text-white/90 font-bold drop-shadow">
+        🎮 ¡Aprende a ser un super Youtuber seguro y divertido!
+    </footer>
+
+    <!-- Lógica del Juego en JS -->
+    <script>
+        // 20 Preguntas adaptadas para niños de 3ro de primaria con reglas de seguridad y tarjetón escolar
+        const questions = [
+            // NIVEL 1: Primeros Pasos y Seguridad Escolar (1 a 5)
+            {
+                level: "🌱 Nivel 1: Seguridad y Escuela",
+                levelBg: "bg-emerald-500 text-white",
+                text: "Traer a la escuela tu tarjetón con tu correo y contraseña cuando el maestro te lo pida para la clase de computación.",
+                correct: "green",
+                explanation: "🟩 <strong>¡Tarjeta Verde! ¡Excelente!</strong> Es una buena acción. Debes traer tu tarjetón a la escuela bien cuidado para poder trabajar en la clase de computación."
+            },
+            {
+                level: "🌱 Nivel 1: Seguridad y Escuela",
+                levelBg: "bg-emerald-500 text-white",
+                text: "Hablar y chatear por internet con personas desconocidas que te mandan mensajes.",
+                correct: "red",
+                explanation: "🟥 <strong>¡Tarjeta Roja! ¡Mala Acción!</strong> Nunca debes chatear ni responderle a extraños en internet. ¡Cuéntale de inmediato a tus papás o al maestro!"
+            },
+            {
+                level: "🌱 Nivel 1: Seguridad y Escuela",
+                levelBg: "bg-emerald-500 text-white",
+                text: "Compartir tu contraseña con tus amigos del salón para que jueguen con tu cuenta.",
+                correct: "red",
+                explanation: "🟥 <strong>¡Tarjeta Roja! ¡Mala Acción!</strong> Las contraseñas son secretas y personales. No se le comparten a los amigos, solo a tus papás o maestro."
+            },
+            {
+                level: "🌱 Nivel 1: Seguridad y Escuela",
+                levelBg: "bg-emerald-500 text-white",
+                text: "Pedir ayuda a un adulto de confianza (papá, mamá o maestro) si algo en internet te da miedo o duda.",
+                correct: "green",
+                explanation: "🟩 <strong>¡Tarjeta Verde! ¡Muy inteligente!</strong> Tus papás y maestros siempre están para cuidarte y ayudarte con las pantallas."
+            },
+            {
+                level: "🌱 Nivel 1: Seguridad y Escuela",
+                levelBg: "bg-emerald-500 text-white",
+                text: "Tratar con respeto y amabilidad a tus compañeros de clase en los comentarios o chats escolares.",
+                correct: "green",
+                explanation: "🟩 <strong>¡Tarjeta Verde! ¡Bien hecho!</strong> La amabilidad y el respeto son la regla número uno dentro y fuera de internet."
+            },
+
+            // NIVEL 2: La Ciudad de la Convivencia (6 a 10)
+            {
+                level: "🏰 Nivel 2: La Ciudad del Respeto",
+                levelBg: "bg-blue-500 text-white",
+                text: "Usar groserías o burlarte de otros niños mientras juegas en línea.",
+                correct: "red",
+                explanation: "🟥 <strong>¡Tarjeta Roja! ¡Mala Acción!</strong> Burlarse o decir groserías lastima a los demás. Todos debemos jugar en paz y con respeto."
+            },
+            {
+                level: "🏰 Nivel 2: La Ciudad del Respeto",
+                levelBg: "bg-blue-500 text-white",
+                text: "Copiar el video, dibujo o tarea de otro compañero y decir que tú lo hiciste solo.",
+                correct: "red",
+                explanation: "🟥 <strong>¡Tarjeta Roja! ¡Mala Acción!</strong> Copiar sin dar crédito no es honesto. Siempre crea tus propias cosas o dale las gracias al creador original."
+            },
+            {
+                level: "🏰 Nivel 2: La Ciudad del Respeto",
+                levelBg: "bg-blue-500 text-white",
+                text: "Hacer videos o presentaciones mostrando un talento propio, como dibujar, cantar o hacer una manualidad.",
+                correct: "green",
+                explanation: "🟩 <strong>¡Tarjeta Verde! ¡Genial!</strong> Compartir tus talentos de forma positiva inspira y alegra a los demás."
+            },
+            {
+                level: "🏰 Nivel 2: La Ciudad del Respeto",
+                levelBg: "bg-blue-500 text-white",
+                text: "Guardar en secreto si alguien en un juego en línea te pide tus fotos o datos personales.",
+                correct: "red",
+                explanation: "🟥 <strong>¡Tarjeta Roja! ¡Peligro!</strong> NUNCA te guardes esos secretos. Debes avisarle inmediatamente a un adulto de confianza."
+            },
+            {
+                level: "🏰 Nivel 2: La Ciudad del Respeto",
+                levelBg: "bg-blue-500 text-white",
+                text: "Pedir permiso a tus papás antes de descargar un juego, aplicación o video.",
+                correct: "green",
+                explanation: "🟩 <strong>¡Tarjeta Verde! ¡Superhéroe de la seguridad!</strong> Los adultos saben cuáles aplicaciones son seguras y aptas para tu edad."
+            },
+
+            // NIVEL 3: Tesoro de la Privacidad (11 a 15)
+            {
+                level: "🛡️ Nivel 3: El Tesoro de la Privacidad",
+                levelBg: "bg-amber-500 text-white",
+                text: "Aceptar invitaciones de amistad en juegos de personas que no conoces en la vida real.",
+                correct: "red",
+                explanation: "🟥 <strong>¡Tarjeta Roja! ¡Mala Acción!</strong> Solo debes agregar a personas que conozcas en persona, como tus amigos de la escuela o familiares."
+            },
+            {
+                level: "🛡️ Nivel 3: El Tesoro de la Privacidad",
+                levelBg: "bg-amber-500 text-white",
+                text: "Guardar tu tarjetón de correo escolar en tu mochila para no perderlo ni olvidarlo el día de clase.",
+                correct: "green",
+                explanation: "🟩 <strong>¡Tarjeta Verde! ¡Súper responsable!</strong> Cuidar tus herramientas de la escuela te ayuda a ser un excelente estudiante."
+            },
+            {
+                level: "🛡️ Nivel 3: El Tesoro de la Privacidad",
+                levelBg: "bg-amber-500 text-white",
+                text: "Decirle en un video a tus seguidores en qué calle vives o cuál es tu número de teléfono.",
+                correct: "red",
+                explanation: "🟥 <strong>¡Tarjeta Roja! ¡Peligro!</strong> Tus datos personales son privados y jamás deben publicarse en internet."
+            },
+            {
+                level: "🛡️ Nivel 3: El Tesoro de la Privacidad",
+                levelBg: "bg-amber-500 text-white",
+                text: "Preguntarle a tu amigo si le parece bien salir en el video que estás grabando con tu tableta.",
+                correct: "green",
+                explanation: "🟩 <strong>¡Tarjeta Verde! ¡Bien pensado!</strong> Siempre debemos respetar a nuestros amigos y preguntarles antes de grabarlos."
+            },
+            {
+                level: "🛡️ Nivel 3: El Tesoro de la Privacidad",
+                levelBg: "bg-amber-500 text-white",
+                text: "Poner títulos engañosos y mentirosos en tus videos para obligar a la gente a hacer clic.",
+                correct: "red",
+                explanation: "🟥 <strong>¡Tarjeta Roja! ¡Mala Acción!</strong> Decir mentiras hace que las personas pierdan la confianza en ti. Un buen creador dice la verdad."
+            },
+
+            // NIVEL 4: Superestrella Digital (16 a 20)
+            {
+                level: "🌟 Nivel 4: Superestrella Digital",
+                levelBg: "bg-purple-600 text-white",
+                text: "Hacer un reto peligroso de internet donde te puedes lastimar o golpear.",
+                correct: "red",
+                explanation: "🟥 <strong>¡Tarjeta Roja! ¡Muy peligroso!</strong> Ningún reto o video vale la pena si pones en riesgo tu salud o tu cuerpo."
+            },
+            {
+                level: "🌟 Nivel 4: Superestrella Digital",
+                levelBg: "bg-purple-600 text-white",
+                text: "Apagar la computadora o tableta cuando se acaba el tiempo de juego y salir a jugar al patio.",
+                correct: "green",
+                explanation: "🟩 <strong>¡Tarjeta Verde! ¡Campeón!</strong> Descansar la vista y hacer ejercicio es muy importante para crecer sano y fuerte."
+            },
+            {
+                level: "🌟 Nivel 4: Superestrella Digital",
+                levelBg: "bg-purple-600 text-white",
+                text: "Molestarte y enojarte feo con tus papás cuando te piden apagar la pantalla.",
+                correct: "red",
+                explanation: "🟥 <strong>¡Tarjeta Roja! ¡Mala Acción!</strong> Debemos obedecer con una sonrisa a nuestros papás cuando nos marcan los horarios de pantalla."
+            },
+            {
+                level: "🌟 Nivel 4: Superestrella Digital",
+                levelBg: "bg-purple-600 text-white",
+                text: "Agradecer amablemente a quienes te apoyan y ven tus videos o trabajos.",
+                correct: "green",
+                explanation: "🟩 <strong>¡Tarjeta Verde! ¡Qué buen corazón!</strong> Ser educado y agradecido te convierte en un verdadero creador estrella."
+            },
+            {
+                level: "🌟 Nivel 4: Superestrella Digital",
+                levelBg: "bg-purple-600 text-white",
+                text: "Usar la tecnología e internet para aprender cosas útiles, divertirte sanamente y ser un buen compañero.",
+                correct: "green",
+                explanation: "🟩 <strong>¡Tarjeta Verde! ¡Superestrella de Internet!</strong> ¡Ese es el verdadero objetivo de ser un gran creador de contenido!"
+            }
+        ];
+
+        // Variables de estado
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        // Elementos DOM
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const endScreen = document.getElementById('end-screen');
+        
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const btnGreen = document.getElementById('btn-green');
+        const btnRed = document.getElementById('btn-red');
+        const nextBtn = document.getElementById('next-btn');
+
+        const questionText = document.getElementById('question-text');
+        const levelBadge = document.getElementById('level-badge');
+        const progressText = document.getElementById('progress-text');
+        const progressBar = document.getElementById('progress-bar');
+        const scoreDisplay = document.getElementById('score-display');
+
+        const cardContainer = document.getElementById('card-container');
+        const feedbackPanel = document.getElementById('feedback-panel');
+        const feedbackIcon = document.getElementById('feedback-icon');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const feedbackDesc = document.getElementById('feedback-desc');
+
+        const finalScore = document.getElementById('final-score');
+        const rankBadge = document.getElementById('rank-badge');
+        const rankDescription = document.getElementById('rank-description');
+        const endIcon = document.getElementById('end-icon');
+
+        // Escuchadores de eventos
+        startBtn.addEventListener('click', startGame);
+        restartBtn.addEventListener('click', startGame);
+        btnGreen.addEventListener('click', () => handleAnswer('green'));
+        btnRed.addEventListener('click', () => handleAnswer('red'));
+        nextBtn.addEventListener('click', nextQuestion);
+
+        function startGame() {
+            currentQuestionIndex = 0;
+            score = 0;
+            scoreDisplay.textContent = score;
+
+            startScreen.classList.add('hidden');
+            endScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            quizScreen.classList.add('flex');
+
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            cardContainer.classList.remove('hidden');
+            feedbackPanel.classList.add('hidden');
+            
+            const q = questions[currentQuestionIndex];
+
+            questionText.textContent = q.text;
+            levelBadge.textContent = q.level;
+            levelBadge.className = `px-4 py-1.5 rounded-full font-game text-xs sm:text-sm font-bold ${q.levelBg}`;
+            
+            const progressPercent = ((currentQuestionIndex + 1) / questions.length) * 100;
+            progressBar.style.width = `${progressPercent}%`;
+            progressText.textContent = `Pregunta ${currentQuestionIndex + 1} de ${questions.length}`;
+
+            // Animación de aparición
+            cardContainer.classList.remove('card-pop');
+            void cardContainer.offsetWidth; // Refrescar animación
+            cardContainer.classList.add('card-pop');
+        }
+
+        function handleAnswer(selected) {
+            const q = questions[currentQuestionIndex];
+            const isCorrect = (selected === q.correct);
+
+            if (isCorrect) {
+                score++;
+                scoreDisplay.textContent = score;
+                
+                // Efecto confeti para niños cuando aciertan
+                try {
+                    confetti({
+                        particleCount: 50,
+                        spread: 60,
+                        origin: { y: 0.7 }
+                    });
+                } catch(e) {}
+
+                showFeedback(true, q.explanation);
+            } else {
+                showFeedback(false, q.explanation);
+            }
+        }
+
+        function showFeedback(isCorrect, explanationText) {
+            cardContainer.classList.add('hidden');
+            feedbackPanel.classList.remove('hidden');
+
+            if (isCorrect) {
+                feedbackPanel.className = "bg-white/95 backdrop-blur-md rounded-3xl p-6 sm:p-8 text-center border-4 border-emerald-400 shadow-2xl card-pop";
+                feedbackIcon.innerHTML = "🎉";
+                feedbackTitle.textContent = "¡SÚPER BIEN! ¡ACERTASTE!";
+                feedbackTitle.className = "text-2xl sm:text-3xl font-game font-bold mb-2 text-emerald-500";
+            } else {
+                feedbackPanel.className = "bg-white/95 backdrop-blur-md rounded-3xl p-6 sm:p-8 text-center border-4 border-rose-400 shadow-2xl card-pop shake";
+                feedbackIcon.innerHTML = "😮";
+                feedbackTitle.textContent = "¡CASI! APRENDAMOS JUNTOS";
+                feedbackTitle.className = "text-2xl sm:text-3xl font-game font-bold mb-2 text-rose-500";
+            }
+
+            feedbackDesc.innerHTML = explanationText;
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+            } else {
+                showEndScreen();
+            }
+        }
+
+        function showEndScreen() {
+            quizScreen.classList.add('hidden');
+            quizScreen.classList.remove('flex');
+            endScreen.classList.remove('hidden');
+
+            finalScore.textContent = `${score} / ${questions.length}`;
+
+            // Confeti grande de celebración final
+            try {
+                confetti({
+                    particleCount: 150,
+                    spread: 100,
+                    origin: { y: 0.5 }
+                });
+            } catch(e) {}
+
+            let rank = "";
+            let desc = "";
+            let icon = "🏆";
+            let badgeStyle = "";
+
+            if (score >= 18) {
+                rank = "🥇 Medalla de Oro: Experto Digital Diamante";
+                icon = "💎";
+                badgeStyle = "bg-kidsYellow text-slate-900 border-2 border-amber-400";
+                desc = "¡Eres un superhéroe digital! Sabes cuidar tus contraseñas, traer tu tarjetón a la escuela, no hablar con extraños y respetar a todos tus compañeros. ¡Felicitaciones!";
+            } else if (score >= 14) {
+                rank = "🥈 Medalla de Plata: Youtuber Responsable";
+                icon = "⭐";
+                badgeStyle = "bg-sky-300 text-slate-900 border-2 border-sky-500";
+                desc = "¡Muy buen trabajo! Conoces muy bien las reglas de seguridad digital. Sigue repasando tus tarjetas para cuidar siempre tu información.";
+            } else if (score >= 10) {
+                rank = "🥉 Medalla de Bronce: Creador Aprendiz";
+                icon = "🎈";
+                badgeStyle = "bg-amber-200 text-slate-900 border-2 border-amber-400";
+                desc = "¡Vas por buen camino! Aprendiste reglas muy importantes hoy. Recuerda traer siempre tu tarjetón de correo a la escuela y nunca darle tu contraseña a extraños.";
+            } else {
+                rank = "🌱 Semillita Digital";
+                icon = "🐣";
+                badgeStyle = "bg-rose-200 text-slate-900 border-2 border-rose-400";
+                desc = "¡Gracias por jugar! Aprendiste cosas nuevas hoy. Vuelve a jugar para conseguir todas las estrellas y convertirte en un experto de la seguridad digital.";
+            }
+
+            rankBadge.textContent = rank;
+            rankBadge.className = `inline-block px-6 py-2 rounded-full font-game font-bold text-base sm:text-lg ${badgeStyle} shadow-md`;
+            rankDescription.textContent = desc;
+            endIcon.innerHTML = icon;
+        }
+    </script>
+</body>
+</html>
